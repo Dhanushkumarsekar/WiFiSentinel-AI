@@ -1,0 +1,1219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WiFiSentinel AI — Real-Time Wireless Security & Threat Scanner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #070c18;
+  --bg-card: #0d1527;
+  --bg-card-hover: #121e36;
+  --bg-card-elevated: #15223c;
+  --border: #1e2e4a;
+  --border-focus: #38bdf8;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  --cyan: #38bdf8;
+  --cyan-glow: rgba(56, 189, 248, 0.25);
+  --emerald: #10b981;
+  --emerald-glow: rgba(16, 185, 129, 0.2);
+  --amber: #f59e0b;
+  --amber-glow: rgba(245, 158, 11, 0.2);
+  --rose: #f43f5e;
+  --rose-glow: rgba(244, 63, 94, 0.25);
+  --purple: #a855f7;
+  --radius: 14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background-color: var(--bg);
+  background-image: 
+    radial-gradient(circle at 15% 10%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 20%, rgba(168, 85, 247, 0.06) 0%, transparent 45%),
+    radial-gradient(circle at 50% 90%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+  color: var(--text-main);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+.mono { font-family: 'JetBrains Mono', monospace; }
+.container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+/* HEADER */
+header.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 18px 24px;
+  background: rgba(13, 21, 39, 0.7);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 22px;
+}
+.brand { display: flex; align-items: center; gap: 14px; }
+.logo-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0284c7, #38bdf8);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 20px var(--cyan-glow);
+}
+.logo-icon svg { width: 28px; height: 28px; stroke: #041226; }
+.brand h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; color: #fff; }
+.brand .sub { font-size: 13px; color: var(--text-muted); font-weight: 400; }
+
+.header-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: var(--emerald);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.status-pill.scanning {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.35);
+  color: var(--cyan);
+}
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+  animation: pulse 1.8s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(1.3); }
+}
+
+/* BUTTONS */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-main);
+  text-decoration: none;
+}
+.btn:hover { background: var(--bg-card-hover); border-color: #2e446d; transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn-primary {
+  background: linear-gradient(135deg, #0284c7, #38bdf8);
+  border-color: #38bdf8;
+  color: #041226;
+  font-weight: 700;
+  box-shadow: 0 4px 14px var(--cyan-glow);
+}
+.btn-primary:hover { filter: brightness(1.1); box-shadow: 0 6px 20px var(--cyan-glow); }
+.btn-emerald {
+  background: linear-gradient(135deg, #059669, #10b981);
+  border-color: #10b981;
+  color: #022013;
+  font-weight: 700;
+  box-shadow: 0 4px 14px var(--emerald-glow);
+}
+.btn-emerald:hover { filter: brightness(1.1); }
+.btn-sm { padding: 6px 11px; font-size: 12px; border-radius: 8px; }
+.btn:disabled { opacity: 0.55; cursor: wait; pointer-events: none; }
+
+/* AUTO SCAN TOGGLE */
+.toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-card);
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+.toggle-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+.switch { position: relative; width: 38px; height: 20px; display: inline-block; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #243552; transition: .3s; border-radius: 20px;
+}
+.slider:before {
+  position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px;
+  background-color: white; transition: .3s; border-radius: 50%;
+}
+input:checked + .slider { background-color: var(--cyan); }
+input:checked + .slider:before { transform: translateX(18px); background-color: #041226; }
+
+/* HERO SHIELD: HOST WI-FI POSTURE */
+.hero-shield {
+  background: linear-gradient(145deg, #0f1c35, #0a1324);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 26px;
+  margin-bottom: 22px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 24px;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+.hero-shield::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+}
+.shield-badge-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  display: grid;
+  place-items: center;
+  color: var(--cyan);
+}
+.shield-badge-icon.secure { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); color: var(--emerald); }
+.shield-badge-icon.vulnerable { background: rgba(244, 63, 94, 0.12); border-color: rgba(244, 63, 94, 0.4); color: var(--rose); animation: shake 1s infinite alternate; }
+.shield-info h2 { font-size: 19px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
+.shield-meta { display: flex; flex-wrap: wrap; gap: 18px; font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+.shield-meta-item { display: flex; align-items: center; gap: 6px; }
+.shield-meta-item strong { color: var(--text-main); font-weight: 600; }
+.shield-score-wrap { text-align: right; }
+.shield-score-val { font-size: 38px; font-weight: 800; line-height: 1; letter-spacing: -0.03em; }
+.shield-score-val.safe { color: var(--emerald); }
+.shield-score-val.moderate { color: var(--amber); }
+.shield-score-val.critical { color: var(--rose); }
+.shield-score-lbl { font-size: 12px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+
+/* METRICS GRID */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  transition: transform 0.2s, border-color 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card:hover { transform: translateY(-2px); border-color: #2b4166; }
+.stat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.stat-title { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+.stat-icon { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; }
+.stat-num { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; color: #fff; line-height: 1.1; }
+.stat-desc { font-size: 12px; color: var(--text-dim); margin-top: 6px; }
+
+/* MAIN SPLIT */
+.two-col {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+.panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+}
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.panel-title { font-size: 16px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
+.panel-subtitle { font-size: 12px; color: var(--text-muted); font-weight: 400; }
+
+/* TABLE */
+.table-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.filter-tabs { display: flex; gap: 6px; background: #0a1120; padding: 4px; border-radius: 9px; border: 1px solid var(--border); }
+.filter-tab {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 7px;
+  color: var(--text-muted);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  transition: all 0.2s;
+}
+.filter-tab.active { background: #1a2a47; color: var(--cyan); }
+.search-input {
+  background: #0a1120;
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  outline: none;
+  width: 180px;
+}
+.search-input:focus { border-color: var(--cyan); }
+
+.table-responsive { overflow-x: auto; max-height: 480px; }
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+table.data-table th {
+  padding: 10px 12px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border);
+  background: #0d1527;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+table.data-table td {
+  padding: 13px 12px;
+  border-bottom: 1px solid rgba(30, 46, 74, 0.6);
+  vertical-align: middle;
+}
+table.data-table tbody tr {
+  transition: background 0.15s;
+  cursor: pointer;
+}
+table.data-table tbody tr:hover { background: var(--bg-card-hover); }
+table.data-table tbody tr.row-connected {
+  background: rgba(56, 189, 248, 0.04);
+  border-left: 3px solid var(--cyan);
+}
+
+/* PILLS & BADGES */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.tag-connected { background: rgba(56, 189, 248, 0.15); color: var(--cyan); border: 1px solid rgba(56, 189, 248, 0.3); }
+.tag-safe { background: rgba(16, 185, 129, 0.15); color: var(--emerald); border: 1px solid rgba(16, 185, 129, 0.3); }
+.tag-moderate { background: rgba(245, 158, 11, 0.15); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.3); }
+.tag-high { background: rgba(244, 63, 94, 0.15); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.3); }
+.tag-critical { background: rgba(220, 38, 38, 0.25); color: #fca5a5; border: 1px solid #ef4444; font-weight: 700; }
+.tag-info { background: rgba(148, 163, 184, 0.12); color: var(--text-muted); }
+
+/* SIGNAL BAR */
+.signal-meter { display: flex; align-items: flex-end; gap: 2px; height: 16px; }
+.signal-bar { width: 3px; background: #263857; border-radius: 2px; }
+.signal-bar:nth-child(1) { height: 4px; }
+.signal-bar:nth-child(2) { height: 8px; }
+.signal-bar:nth-child(3) { height: 12px; }
+.signal-bar:nth-child(4) { height: 16px; }
+.signal-bar.active { background: var(--cyan); }
+.signal-bar.active.strong { background: var(--emerald); }
+.signal-bar.active.weak { background: var(--rose); }
+
+/* SEVERITY BARS */
+.sev-bar-item { margin-bottom: 14px; }
+.sev-bar-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
+.sev-bar-track { height: 8px; background: #0c1424; border-radius: 99px; overflow: hidden; border: 1px solid rgba(255,255,255,0.04); }
+.sev-bar-fill { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+
+/* FINDINGS LIST */
+.findings-feed { display: flex; flex-direction: column; gap: 12px; max-height: 520px; overflow-y: auto; padding-right: 4px; }
+.finding-card {
+  background: #0b1323;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  transition: border-color 0.2s;
+}
+.finding-card:hover { border-color: #2e446d; }
+.finding-card.sev-Critical { border-left: 4px solid #ef4444; background: linear-gradient(90deg, rgba(239,68,68,0.06), #0b1323); }
+.finding-card.sev-High { border-left: 4px solid #f97316; background: linear-gradient(90deg, rgba(249,115,22,0.06), #0b1323); }
+.finding-card.sev-Medium { border-left: 4px solid var(--amber); }
+.finding-card.sev-Low { border-left: 4px solid var(--cyan); }
+.finding-card.sev-Info { border-left: 4px solid var(--emerald); }
+
+.finding-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
+.finding-title { font-size: 14px; font-weight: 700; color: #fff; }
+.finding-net { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.finding-body { font-size: 13px; color: #cbd5e1; margin-bottom: 10px; line-height: 1.45; }
+.finding-meta {
+  background: rgba(0, 0, 0, 0.25);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+.finding-meta strong { color: var(--text-muted); font-weight: 600; }
+.finding-rec { color: #86efac; font-weight: 500; }
+
+/* RECENT ASSESSMENTS */
+.history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: #0b1323;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  transition: background 0.15s;
+}
+.history-item:hover { background: #111d33; }
+
+/* TOAST */
+.toast-msg {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #101c33;
+  border: 1px solid #28446e;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  padding: 12px 18px;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 13px;
+  display: none;
+  z-index: 1000;
+  max-width: 400px;
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* EMPTY STATE */
+.empty-box {
+  padding: 36px 20px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* RADAR ICON ROTATE ANIMATION */
+.radar-active {
+  animation: spin 3s linear infinite;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* RESPONSIVE */
+@media(max-width: 1024px) {
+  .hero-shield { grid-template-columns: 1fr; text-align: left; }
+  .shield-score-wrap { text-align: left; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .two-col { grid-template-columns: 1fr; }
+}
+@media(max-width: 640px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  header.app-header { flex-direction: column; align-items: flex-start; }
+  .header-controls { width: 100%; justify-content: space-between; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- APP HEADER -->
+  <header class="app-header">
+    <div class="brand">
+      <div class="logo-icon" id="brandIcon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+          <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+          <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+          <line x1="12" y1="20" x2="12.01" y2="20"></line>
+        </svg>
+      </div>
+      <div>
+        <h1>WiFiSentinel AI</h1>
+        <div class="sub">Real-Time Defensive Wireless Threat & Risk Engine</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <!-- Status Badge -->
+      <div class="status-pill scanning" id="statusPill">
+        <span class="pulse-dot"></span>
+        <span id="statusText">LIVE MONITOR READY</span>
+      </div>
+
+      <!-- Real-Time Auto-Scan Toggle -->
+      <div class="toggle-wrapper" title="Automatically scan host Wi-Fi every 3.5 seconds">
+        <span class="toggle-label">Real-Time Auto-Scan</span>
+        <label class="switch">
+          <input type="checkbox" id="autoScanToggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- Actions -->
+      <button class="btn btn-primary" id="btnScanNow" onclick="manualScan('live')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <span>Scan System Now</span>
+      </button>
+
+      <button class="btn" id="btnSaveSnapshot" onclick="saveCurrentSnapshot()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+        <span>Save Snapshot</span>
+      </button>
+
+      <button class="btn btn-sm" id="btnDemo" onclick="manualScan('demo')">
+        ▶ Demo Sim
+      </button>
+    </div>
+  </header>
+
+  <!-- HOST WI-FI POSTURE HERO -->
+  <section class="hero-shield" id="heroShield">
+    <div class="shield-badge-icon secure" id="shieldIcon">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+      </svg>
+    </div>
+
+    <div class="shield-info">
+      <h2 id="hostTitle">
+        <span id="connStatus">Host Connected: Infinix NOTE</span>
+        <span class="tag tag-safe" id="connTag">PROTECTED</span>
+      </h2>
+      <div style="font-size: 13px; color: #94a3b8;" id="hostDesc">
+        Intel(R) Wi-Fi 6E AX211 160MHz · WPA3-Personal with SAE & PMF Enforced
+      </div>
+      <div class="shield-meta">
+        <div class="shield-meta-item">
+          <span>SSID:</span> <strong class="mono" id="metaSsid">Infinix NOTE</strong>
+        </div>
+        <div class="shield-meta-item">
+          <span>BSSID:</span> <strong class="mono" id="metaBssid">8e:64:ef:a8:d2:3b</strong>
+        </div>
+        <div class="shield-meta-item">
+          <span>Security:</span> <strong id="metaSec">WPA3-Personal (CCMP)</strong>
+        </div>
+        <div class="shield-meta-item">
+          <span>Channel / Band:</span> <strong id="metaBand">Ch 11 · 2.4 GHz</strong>
+        </div>
+        <div class="shield-meta-item">
+          <span>Signal:</span> <strong id="metaSignal">99% (-28 dBm)</strong>
+        </div>
+        <div class="shield-meta-item">
+          <span>Link Speed:</span> <strong id="metaSpeed">72.2 Mbps Tx / Rx</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="shield-score-wrap">
+      <div class="shield-score-val safe" id="hostScoreVal">0</div>
+      <div class="shield-score-lbl" id="hostScoreLbl">Host Risk Score (Safe)</div>
+    </div>
+  </section>
+
+  <!-- STATS GRID -->
+  <section class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-title">Visible Networks</span>
+        <div class="stat-icon" style="background: rgba(56, 189, 248, 0.1); color: var(--cyan);">⌁</div>
+      </div>
+      <div class="stat-num" id="sNetworks">—</div>
+      <div class="stat-desc" id="sNetworksDesc">Total Wi-Fi transmitters in range</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-title">Identified Vulnerabilities</span>
+        <div class="stat-icon" style="background: rgba(244, 63, 94, 0.1); color: var(--rose);">⚠</div>
+      </div>
+      <div class="stat-num" id="sFindings">—</div>
+      <div class="stat-desc" id="sFindingsDesc">Defensive security findings</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-title">High / Critical Threats</span>
+        <div class="stat-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">✕</div>
+      </div>
+      <div class="stat-num" id="sHighCrit" style="color: #fca5a5;">—</div>
+      <div class="stat-desc">Immediate wireless exposure risks</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-title">Environment Risk Avg</span>
+        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--emerald);">⚡</div>
+      </div>
+      <div class="stat-num" id="sAvgRisk">—</div>
+      <div class="stat-desc" id="sAvgRiskDesc">Mean risk score across perimeter</div>
+    </div>
+  </section>
+
+  <!-- TWO-COLUMN DASHBOARD -->
+  <div class="two-col">
+
+    <!-- LEFT: WIRELESS INVENTORY TABLE -->
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+            <span>Real-Time Wireless Inventory</span>
+          </div>
+          <div class="panel-subtitle" id="lastUpdatedSub">Updated just now</div>
+        </div>
+
+        <div class="table-filter-bar">
+          <input type="text" class="search-input" id="tableSearch" placeholder="Search SSID / BSSID…" oninput="filterNetworks()">
+          <div class="filter-tabs">
+            <button class="filter-tab active" onclick="setFilter('all', this)">All</button>
+            <button class="filter-tab" onclick="setFilter('connected', this)">Connected</button>
+            <button class="filter-tab" onclick="setFilter('threats', this)">Threats</button>
+            <button class="filter-tab" onclick="setFilter('wpa3', this)">WPA3</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Network / SSID</th>
+              <th>Security / Cipher</th>
+              <th>Channel & Band</th>
+              <th>Signal</th>
+              <th>Risk Score</th>
+              <th>Findings</th>
+            </tr>
+          </thead>
+          <tbody id="networkTableBody">
+            <tr>
+              <td colspan="6" class="empty-box">Initializing real-time wireless scanner…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RIGHT: SEVERITY BREAKDOWN & QUICK SNAPSHOTS -->
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"></path><path d="M12 20V4"></path><path d="M6 20v-6"></path></svg>
+            <span>Threat Severity Distribution</span>
+          </div>
+          <div class="panel-subtitle">Vulnerability impact breakdown</div>
+        </div>
+      </div>
+
+      <div id="severityBars">
+        <div class="empty-box">No findings analyzed yet.</div>
+      </div>
+
+      <div style="margin-top: 24px; border-top: 1px solid var(--border); padding-top: 18px;">
+        <div class="panel-header" style="margin-bottom: 12px;">
+          <div class="panel-title" style="font-size: 14px;">Recent Assessment Snapshots</div>
+          <button class="btn btn-sm" onclick="loadHistory()">Refresh</button>
+        </div>
+        <div id="historyList">
+          <div class="empty-box">No saved assessments.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FINDINGS & REMEDIATION DETAIL SECTION -->
+  <section class="panel" style="margin-bottom: 22px;">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <span>Defensive Findings & Remediation Advisory</span>
+        </div>
+        <div class="panel-subtitle">Evidence, threat impact analysis, and actionable configuration hardening</div>
+      </div>
+      <div style="display:flex; gap:8px;" id="exportButtons">
+        <button class="btn btn-sm" onclick="exportData('json')">Export JSON</button>
+        <button class="btn btn-sm" onclick="exportData('pdf')">Export PDF Report</button>
+      </div>
+    </div>
+
+    <div class="findings-feed" id="findingsFeed">
+      <div class="empty-box">No findings to display.</div>
+    </div>
+  </section>
+
+  <!-- MANUAL AUDIT MODAL / ACCORDION -->
+  <section class="panel">
+    <div class="panel-header" style="cursor: pointer;" onclick="toggleManualAudit()">
+      <div>
+        <div class="panel-title" style="font-size: 15px;">
+          <span>+ Manual Authorized Configuration Audit</span>
+        </div>
+        <div class="panel-subtitle">Evaluate specific router or AP parameters for authorized security verification</div>
+      </div>
+      <span id="manualToggleText" style="color: var(--cyan); font-size: 12px; font-weight: 600;">[ Expand ]</span>
+    </div>
+
+    <form id="manualForm" style="display: none; margin-top: 14px; gap: 12px; flex-wrap: wrap;">
+      <input id="m_ssid" placeholder="Network SSID" required maxlength="128" style="flex: 2; min-width: 170px; background: #0a1120; color: white; border: 1px solid var(--border); border-radius: 9px; padding: 11px;">
+      <select id="m_security" style="flex: 1; min-width: 150px; background: #0a1120; color: white; border: 1px solid var(--border); border-radius: 9px; padding: 11px;">
+        <option value="WPA3-Personal">WPA3-Personal</option>
+        <option value="WPA2-Personal">WPA2-Personal</option>
+        <option value="WPA">Legacy WPA</option>
+        <option value="WEP">WEP (Obsolete)</option>
+        <option value="OPEN">OPEN / None</option>
+        <option value="Unknown">Unknown</option>
+      </select>
+      <input id="m_signal" type="number" min="0" max="100" placeholder="Signal (0–100%)" style="flex: 1; min-width: 130px; background: #0a1120; color: white; border: 1px solid var(--border); border-radius: 9px; padding: 11px;">
+      <input id="m_channel" type="number" min="1" max="233" placeholder="Channel (e.g. 11)" style="flex: 1; min-width: 130px; background: #0a1120; color: white; border: 1px solid var(--border); border-radius: 9px; padding: 11px;">
+      <button class="btn btn-emerald" type="submit" style="padding: 11px 20px;">Run Audit</button>
+    </form>
+  </section>
+
+  <footer style="margin-top: 24px; padding: 16px 0; border-top: 1px solid rgba(255,255,255,0.05); font-size: 12px; color: var(--text-dim); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+    <div>WiFiSentinel AI v2.0 · Local-First Real-Time Defensive Wireless Engine</div>
+    <div>Authorized testing only · Evidence-based 802.11 metadata analysis</div>
+  </footer>
+
+</div>
+
+<div class="toast-msg" id="toast"></div>
+
+<script>
+let currentData = null;
+let currentFilter = 'all';
+let autoScanTimer = null;
+let isAutoScanRunning = true;
+let eventSource = null;
+
+const $ = id => document.getElementById(id);
+
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 3500);
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function api(url, opts = {}) {
+  const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.detail || data.message || 'API request failed');
+  return data;
+}
+
+// RENDER ALL DATA ON DASHBOARD
+function render(data) {
+  currentData = data;
+  const summary = data.summary || {};
+  const networks = data.networks || [];
+  const iface = data.interface || {};
+
+  // Host Wi-Fi Connection Card
+  renderHostShield(iface, networks);
+
+  // Metrics
+  $('sNetworks').textContent = summary.networks ?? networks.length;
+  $('sFindings').textContent = summary.findings ?? 0;
+  $('sHighCrit').textContent = summary.high_critical ?? 0;
+  $('sAvgRisk').textContent = (summary.average_risk ?? 0) + '%';
+  $('lastUpdatedSub').textContent = `Last scanned: ${new Date().toLocaleTimeString()} · Mode: ${(data.mode || 'LIVE').toUpperCase()}`;
+
+  // Table
+  renderTable(networks);
+
+  // Severity Bars
+  renderSeverity(networks);
+
+  // Findings
+  renderFindings(networks);
+}
+
+// RENDER HOST WI-FI POSTURE CARD
+function renderHostShield(iface, networks) {
+  const connNet = networks.find(n => n.is_connected) || (iface.is_connected ? iface : null);
+  const shieldIcon = $('shieldIcon');
+  const hostTitle = $('hostTitle');
+  const connTag = $('connTag');
+  const hostScoreVal = $('hostScoreVal');
+  const hostScoreLbl = $('hostScoreLbl');
+
+  if (connNet && (connNet.ssid || iface.is_connected)) {
+    const ssid = connNet.ssid || iface.connected_ssid || 'Unknown';
+    const bssid = connNet.bssid || iface.connected_bssid || '—';
+    const security = connNet.security || iface.security || 'Unknown';
+    const cipher = connNet.cipher || iface.cipher || '—';
+    const channel = connNet.channel || iface.channel || '—';
+    const band = connNet.band || iface.band || '—';
+    const signal = connNet.signal ?? iface.signal ?? '—';
+    const risk = connNet.risk_score ?? 0;
+    const grade = connNet.security_grade || (risk === 0 ? 'A' : risk < 20 ? 'B' : 'F');
+
+    $('connStatus').textContent = `Host Connected: ${ssid}`;
+    $('hostDesc').textContent = `${iface.description || 'Wireless Adapter'} · Security: ${security} (${cipher})`;
+    $('metaSsid').textContent = ssid;
+    $('metaBssid').textContent = bssid;
+    $('metaSec').textContent = `${security} / ${cipher}`;
+    $('metaBand').textContent = `${band} · Ch ${channel}`;
+    $('metaSignal').textContent = `${signal}% ${iface.rssi ? '(' + iface.rssi + ' dBm)' : ''}`;
+    $('metaSpeed').textContent = iface.transmit_rate ? `${iface.transmit_rate} Mbps Tx / Rx` : 'Adaptive';
+
+    hostScoreVal.textContent = risk;
+    hostScoreVal.className = 'shield-score-val ' + (risk >= 30 ? 'critical' : risk >= 10 ? 'moderate' : 'safe');
+    hostScoreLbl.textContent = `Host Risk (Grade ${grade})`;
+
+    if (risk >= 30) {
+      shieldIcon.className = 'shield-badge-icon vulnerable';
+      connTag.className = 'tag tag-critical';
+      connTag.textContent = 'HIGH RISK';
+    } else if (risk >= 10) {
+      shieldIcon.className = 'shield-badge-icon';
+      connTag.className = 'tag tag-moderate';
+      connTag.textContent = 'MODERATE';
+    } else {
+      shieldIcon.className = 'shield-badge-icon secure';
+      connTag.className = 'tag tag-safe';
+      connTag.textContent = 'PROTECTED';
+    }
+  } else {
+    $('connStatus').textContent = 'Host Disconnected from Wi-Fi';
+    connTag.className = 'tag tag-info';
+    connTag.textContent = 'OFFLINE';
+    $('hostDesc').textContent = iface.description ? `${iface.description} · Not connected to any wireless access point` : 'No active Wi-Fi connection detected';
+    $('metaSsid').textContent = 'None';
+    $('metaBssid').textContent = '—';
+    $('metaSec').textContent = '—';
+    $('metaBand').textContent = '—';
+    $('metaSignal').textContent = '0%';
+    $('metaSpeed').textContent = '—';
+    hostScoreVal.textContent = '—';
+    hostScoreLbl.textContent = 'Host Disconnected';
+    shieldIcon.className = 'shield-badge-icon';
+  }
+}
+
+// RENDER TABLE
+function renderTable(networks) {
+  const tbody = $('networkTableBody');
+  const query = $('tableSearch').value.toLowerCase().trim();
+
+  let filtered = networks.filter(n => {
+    if (query && !n.ssid.toLowerCase().includes(query) && !(n.bssid || '').toLowerCase().includes(query) && !n.security.toLowerCase().includes(query)) {
+      return false;
+    }
+    if (currentFilter === 'connected') return n.is_connected;
+    if (currentFilter === 'threats') return (n.risk_score || 0) >= 15;
+    if (currentFilter === 'wpa3') return (n.security || '').toUpperCase().includes('WPA3');
+    return true;
+  });
+
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-box">No networks match the current search / filter.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(n => {
+    const isConn = !!n.is_connected;
+    const score = n.risk_score ?? 0;
+    const grade = n.security_grade || (score === 0 ? 'A' : score < 20 ? 'B' : 'D');
+    const riskClass = score >= 35 ? 'tag-critical' : score >= 20 ? 'tag-high' : score >= 10 ? 'tag-moderate' : 'tag-safe';
+
+    // Signal bars
+    const sig = n.signal ?? 0;
+    const barsActive = sig > 75 ? 4 : sig > 50 ? 3 : sig > 25 ? 2 : sig > 0 ? 1 : 0;
+    const sigColor = sig < 25 ? 'weak' : sig > 70 ? 'strong' : '';
+
+    return `
+      <tr class="${isConn ? 'row-connected' : ''}" onclick="filterFindingsBySsid('${esc(n.ssid)}')">
+        <td>
+          <div style="font-weight: 700; color: #fff; display: flex; align-items: center; gap: 6px;">
+            ${esc(n.ssid)}
+            ${isConn ? '<span class="tag tag-connected">CONNECTED</span>' : ''}
+          </div>
+          <div class="mono" style="font-size: 11px; color: var(--text-dim); margin-top: 2px;">
+            ${esc(n.bssid || n.source || '00:00:00:00:00:00')}
+          </div>
+        </td>
+        <td>
+          <div style="font-weight: 600; color: #e2e8f0;">${esc(n.security || 'Unknown')}</div>
+          <div style="font-size: 11px; color: var(--text-dim);">${esc(n.cipher || '—')}</div>
+        </td>
+        <td>
+          <div>${n.channel ? 'Ch ' + n.channel : '—'}</div>
+          <div style="font-size: 11px; color: var(--text-dim);">${esc(n.band || n.radio || '—')}</div>
+        </td>
+        <td>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="signal-meter">
+              <span class="signal-bar ${barsActive >= 1 ? 'active ' + sigColor : ''}"></span>
+              <span class="signal-bar ${barsActive >= 2 ? 'active ' + sigColor : ''}"></span>
+              <span class="signal-bar ${barsActive >= 3 ? 'active ' + sigColor : ''}"></span>
+              <span class="signal-bar ${barsActive >= 4 ? 'active ' + sigColor : ''}"></span>
+            </div>
+            <span style="font-size: 12px; font-weight: 600;">${n.signal != null ? n.signal + '%' : '—'}</span>
+          </div>
+        </td>
+        <td>
+          <span class="tag ${riskClass}">
+            Grade ${grade} · ${score}/100
+          </span>
+        </td>
+        <td>
+          <span class="tag ${n.findings && n.findings.length ? 'tag-moderate' : 'tag-info'}">
+            ${n.findings ? n.findings.length : 0} findings
+          </span>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// RENDER SEVERITY BREAKDOWN
+function renderSeverity(networks) {
+  const counts = { Critical: 0, High: 0, Medium: 0, Low: 0, Info: 0 };
+  networks.forEach(n => (n.findings || []).forEach(f => {
+    if (counts[f.severity] !== undefined) counts[f.severity]++;
+  }));
+
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  const container = $('severityBars');
+
+  if (!total) {
+    container.innerHTML = `<div class="empty-box">No vulnerabilities flagged across current networks.</div>`;
+    return;
+  }
+
+  const colors = {
+    Critical: 'background: #ef4444;',
+    High: 'background: #f97316;',
+    Medium: 'background: #f59e0b;',
+    Low: 'background: #38bdf8;',
+    Info: 'background: #10b981;'
+  };
+
+  container.innerHTML = Object.entries(counts).map(([sev, count]) => {
+    const pct = total ? Math.round((count / total) * 100) : 0;
+    return `
+      <div class="sev-bar-item">
+        <div class="sev-bar-label">
+          <span><b>${sev}</b></span>
+          <span class="mono">${count} (${pct}%)</span>
+        </div>
+        <div class="sev-bar-track">
+          <div class="sev-bar-fill" style="width: ${pct}%; ${colors[sev]}"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// RENDER FINDINGS ADVISORY
+function renderFindings(networks, filterSsid = null) {
+  const container = $('findingsFeed');
+  let allFindings = networks.flatMap(n => (n.findings || []).map(f => ({ ...f, networkSsid: n.ssid, isConn: n.is_connected })));
+
+  if (filterSsid) {
+    allFindings = allFindings.filter(f => f.networkSsid === filterSsid);
+  }
+
+  if (!allFindings.length) {
+    container.innerHTML = `<div class="empty-box">No findings detected for ${filterSsid ? `network "${filterSsid}"` : 'currently visible networks'}.</div>`;
+    return;
+  }
+
+  container.innerHTML = allFindings.map(f => `
+    <div class="finding-card sev-${f.severity}">
+      <div class="finding-head">
+        <div>
+          <div class="finding-title">${esc(f.title)}</div>
+          <div class="finding-net">
+            Target: <b>${esc(f.networkSsid)}</b> ${f.isConn ? '<span class="tag tag-connected">HOST ACTIVE</span>' : ''}
+          </div>
+        </div>
+        <span class="tag tag-${f.severity.toLowerCase()}">${esc(f.severity)}</span>
+      </div>
+
+      <div class="finding-body">
+        <b>Threat Impact:</b> ${esc(f.impact)}
+      </div>
+
+      <div class="finding-meta">
+        <div><strong>Evidence:</strong> ${esc(f.evidence)}</div>
+        <div><strong>Confidence:</strong> ${esc(f.confidence)} · <strong>Finding ID:</strong> <span class="mono">${esc(f.id)}</span></div>
+        <div class="finding-rec"><strong>Fix:</strong> ${esc(f.recommendation)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterFindingsBySsid(ssid) {
+  if (currentData) {
+    renderFindings(currentData.networks, ssid);
+    toast(`Filtered findings for "${ssid}"`);
+  }
+}
+
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  if (currentData) renderTable(currentData.networks);
+}
+
+function filterNetworks() {
+  if (currentData) renderTable(currentData.networks);
+}
+
+// MANUAL SCAN TRIGGER
+async function manualScan(mode) {
+  const btn = mode === 'live' ? $('btnScanNow') : $('btnDemo');
+  const oldText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<span>Scanning…</span>`;
+  $('brandIcon').classList.add('radar-active');
+  $('statusPill').classList.add('scanning');
+  $('statusText').textContent = 'SCANNING HOST SYSTEM…';
+
+  try {
+    const data = await api(`/api/scan/${mode}?persist=false`, { method: mode === 'demo' ? 'POST' : 'GET' });
+    if (data.supported === false) {
+      toast(data.message || 'Scan not supported');
+      return;
+    }
+    render(data);
+    toast(`Real-time ${mode.toUpperCase()} scan complete.`);
+  } catch (err) {
+    toast(`Scan error: ${err.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = oldText;
+    $('brandIcon').classList.remove('radar-active');
+    $('statusText').textContent = 'LIVE MONITOR ACTIVE';
+  }
+}
+
+// SAVE SNAPSHOT
+async function saveCurrentSnapshot() {
+  const btn = $('btnSaveSnapshot');
+  btn.disabled = true;
+  try {
+    const data = await api('/api/scan/live?persist=true', { method: 'POST' });
+    render(data);
+    await loadHistory();
+    toast(`Snapshot saved to assessment #${data.id}`);
+  } catch (err) {
+    toast(`Save error: ${err.message}`);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// HISTORY
+async function loadHistory() {
+  try {
+    const d = await api('/api/assessments');
+    const history = $('historyList');
+    if (!d.assessments || !d.assessments.length) {
+      history.innerHTML = `<div class="empty-box">No saved assessments.</div>`;
+      return;
+    }
+    history.innerHTML = d.assessments.slice(0, 5).map(a => `
+      <div class="history-item">
+        <div>
+          <div style="font-weight: 700;">#${a.id} · <span style="text-transform: uppercase;">${esc(a.mode)}</span></div>
+          <div style="font-size: 11px; color: var(--text-dim);">${new Date(a.created_at).toLocaleString()}</div>
+        </div>
+        <div style="text-align: right; font-size: 12px; color: var(--text-muted); margin-right: 8px;">
+          ${a.summary.networks} nets · ${a.summary.findings} findings
+        </div>
+        <button class="btn btn-sm" onclick="loadAssessment(${a.id})">Load</button>
+      </div>
+    `).join('');
+  } catch (e) {}
+}
+
+async function loadAssessment(id) {
+  try {
+    const data = await api(`/api/assessments/${id}`);
+    render(data);
+    toast(`Loaded assessment #${id}`);
+  } catch (e) {
+    toast(e.message);
+  }
+}
+
+function exportData(type) {
+  if (!currentData || !currentData.id) {
+    // If running in unsaved live mode, prompt user to save first
+    saveCurrentSnapshot().then(() => {
+      if (currentData && currentData.id) {
+        window.location.href = `/api/assessments/${currentData.id}/${type}`;
+      }
+    });
+  } else {
+    window.location.href = `/api/assessments/${currentData.id}/${type}`;
+  }
+}
+
+function toggleManualAudit() {
+  const form = $('manualForm');
+  const txt = $('manualToggleText');
+  if (form.style.display === 'none') {
+    form.style.display = 'flex';
+    txt.textContent = '[ Collapse ]';
+  } else {
+    form.style.display = 'none';
+    txt.textContent = '[ Expand ]';
+  }
+}
+
+$('manualForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const sig = $('m_signal').value;
+  const chan = $('m_channel').value;
+  try {
+    const payload = {
+      networks: [{
+        ssid: $('m_ssid').value,
+        security: $('m_security').value,
+        signal: sig === '' ? null : Number(sig),
+        channel: chan === '' ? null : Number(chan)
+      }]
+    };
+    const data = await api('/api/audit/manual', { method: 'POST', body: JSON.stringify(payload) });
+    render(data);
+    await loadHistory();
+    toast('Manual configuration audited and saved.');
+  } catch (err) {
+    toast(err.message);
+  }
+});
+
+// REAL-TIME STREAMING & POLLING SETUP
+function initLiveStreaming() {
+  // Start Server-Sent Events (SSE)
+  if (window.EventSource) {
+    try {
+      eventSource = new EventSource('/api/scan/stream');
+      eventSource.onmessage = e => {
+        if (!isAutoScanRunning) return;
+        try {
+          const payload = JSON.parse(e.data);
+          if (payload.supported) {
+            render(payload);
+            $('statusText').textContent = 'LIVE MONITOR ACTIVE';
+            $('statusPill').classList.remove('scanning');
+          }
+        } catch (err) {}
+      };
+      eventSource.onerror = () => {
+        // Fallback to polling if SSE encounters issues
+        if (eventSource) {
+          eventSource.close();
+          eventSource = null;
+        }
+        startPolling();
+      };
+      return;
+    } catch (e) {
+      startPolling();
+    }
+  } else {
+    startPolling();
+  }
+}
+
+function startPolling() {
+  if (autoScanTimer) clearInterval(autoScanTimer);
+  autoScanTimer = setInterval(async () => {
+    if (!isAutoScanRunning) return;
+    try {
+      const data = await api('/api/scan/live?persist=false');
+      if (data.supported) {
+        render(data);
+        $('statusText').textContent = 'LIVE MONITOR ACTIVE';
+      }
+    } catch (e) {}
+  }, 3500);
+}
+
+$('autoScanToggle').addEventListener('change', e => {
+  isAutoScanRunning = e.target.checked;
+  if (isAutoScanRunning) {
+    $('statusText').textContent = 'LIVE MONITOR ACTIVE';
+    $('statusPill').classList.add('scanning');
+    initLiveStreaming();
+    toast('Real-time auto-scanning resumed.');
+  } else {
+    $('statusText').textContent = 'MONITOR PAUSED';
+    $('statusPill').classList.remove('scanning');
+    if (eventSource) { eventSource.close(); eventSource = null; }
+    if (autoScanTimer) { clearInterval(autoScanTimer); autoScanTimer = null; }
+    toast('Real-time auto-scanning paused.');
+  }
+});
+
+// INITIAL LOAD
+window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    await manualScan('live');
+    await loadHistory();
+    initLiveStreaming();
+  } catch (e) {
+    console.error(e);
+  }
+});
+</script>
+
+</body>
+</html>
